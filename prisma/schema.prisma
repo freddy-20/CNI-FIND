@@ -125,3 +125,13 @@ model Report {
 
   createdAt DateTime @default(now())
 }
+
+model BlockedNumber {
+  id String @id @default(cuid())
+
+  phone String @unique
+
+  reason String?
+
+  createdAt DateTime @default(now())
+}
