@@ -118,6 +118,25 @@ export async function POST(request: Request) {
       }
     }
 
+    const blocked =
+  await prisma.blockedNumber.findUnique({
+    where: {
+      phone: body.phone,
+    },
+  });
+
+if (blocked) {
+  return NextResponse.json(
+    {
+      error:
+        "Numéro bloqué",
+    },
+    {
+      status: 403,
+    }
+  );
+}
+    
     return NextResponse.json({
       success: true,
       data: foundDocument,
