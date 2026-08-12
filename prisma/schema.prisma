@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DocumentStatus {
+  LOST
+  FOUND
+  MATCHED
+  CONTACTED
+  RETURNED
+  EXPIRED
+  REPORTED
+  ARCHIVED
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LostDocument {
+  id String @id @default(cuid())
+
+  firstName String
+  lastName String
+
+  birthDate DateTime?
+
+  profession String?
+
+  fatherName String?
+  motherName String?
+
+  birthPlace String?
+
+  lossCity String?
+  lossDate DateTime?
+
+  cniNumber String?
+
+  phone String
+
+  status DocumentStatus @default(LOST)
+
+  matches Match[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FoundDocument {
+  id String @id @default(cuid())
+
+  firstName String
+  lastName String
+
+  cniNumber String?
+
+  birthDate DateTime?
+
+  birthPlace String?
+
+  foundCity String?
+
+  foundDate DateTime?
+
+  photoUrl String
+
+  description String?
+
+  depositorName String
+
+  phone String
+
+  whatsapp String?
+
+  email String?
+
+  status DocumentStatus @default(FOUND)
+
+  matches Match[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Match {
+  id String @id @default(cuid())
+
+  score Float
+
+  verified Boolean @default(false)
+
+  lostId String
+  foundId String
+
+  lost LostDocument @relation(fields: [lostId], references: [id])
+  found FoundDocument @relation(fields: [foundId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Report {
+  id String @id @default(cuid())
+
+  reason String
+
+  description String?
+
+  phone String?
+
+  createdAt DateTime @default(now())
+}
