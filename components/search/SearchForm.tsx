@@ -1,149 +1,125 @@
 "use client";
 
 import { useState } from "react";
+import { hideName } from "@/utils/security";
 
 export default function SearchForm() {
-  const [query, setQuery] =
-    useState("");
-
-  const [results, setResults] =
-    useState<any[]>([]);
-
-  const [loading, setLoading] =
-    useState(false);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
 
   async function search() {
+    if (!query.trim()) return;
+
     setLoading(true);
+    setSearched(true);
 
-    const response =
-      await fetch(
-        "/api/search",
-        {
-          method: "POST",
+    try {
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+      const data = await response.json();
+      setResults(data);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-          body: JSON.stringify({
-            query,
-          }),
-        }
-      );
-
-    const data =
-      await response.json();
-
-    setResults(data);
-
-    setLoading(false);
+  function scoreColor(score: number) {
+    if (score >= 80) return "bg-green-100 text-green-700 border-green-200";
+    if (score >= 60) return "bg-amber-100 text-amber-700 border-amber-200";
+    return "bg-slate-100 text-slate-600 border-slate-200";
   }
 
   return (
     <div>
-
-      <div className="flex gap-3 mb-6">
-
+      <div className="mb-6 flex gap-3">
         <input
           value={query}
-          onChange={(e) =>
-            setQuery(
-              e.target.value
-            )
-          }
-          placeholder="Nom, prénom..."
-          className="flex-1 border p-3 rounded-lg"
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && search()}
+          placeholder="Nom ou prénom..."
+          className="flex-1 rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
         />
-
         <button
           onClick={search}
-          className="bg-blue-600 text-white px-5 rounded-lg"
+          disabled={loading}
+          className="rounded-lg bg-blue-600 px-6 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
         >
-          Rechercher
+          🔍 Rechercher
         </button>
-
       </div>
 
+      {/* État : chargement */}
       {loading && (
-        <p>
-          Recherche...
-        </p>
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border bg-white p-5">
+              <div className="h-4 w-1/3 rounded bg-slate-200" />
+              <div className="mt-3 h-3 w-1/4 rounded bg-slate-100" />
+            </div>
+          ))}
+        </div>
       )}
 
-      <div className="space-y-4">
+      {/* État : vide */}
+      {!loading && searched && results.length === 0 && (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+          <p className="text-3xl">🔎</p>
+          <p className="mt-2 font-medium text-slate-700">Aucune correspondance trouvée</p>
+          <p className="mt-1 text-sm text-slate-400">
+            Essayez avec seulement le nom, ou revenez plus tard — de nouvelles CNI sont ajoutées régulièrement.
+          </p>
+        </div>
+      )}
 
-        {results.map(
-          (item) => (
+      {/* Résultats */}
+      {!loading && results.length > 0 && (
+        <div className="space-y-4">
+          {results.map((item) => (
             <div
               key={item.id}
-              className="bg-white border rounded-xl p-5"
+              className="rounded-xl border bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
             >
-              <div className="flex justify-between">
-
+              <div className="flex items-start justify-between gap-4">
                 <div>
-
-                  <h3 className="font-bold">
-
-                    {
-                      item.lost
-                        .lastName[0]
-                    }
-                    ****
-
-                    {" "}
-
-                    {
-                      item.lost
-                        .firstName[0]
-                    }
-                    ****
-
+                  <h3 className="text-lg font-bold text-slate-800">
+                    {hideName(item.lost.lastName)} {hideName(item.lost.firstName)}
                   </h3>
-
-                  <p className="text-gray-500">
-                    {
-                      item.lost
-                        .lossCity
-                    }
+                  <p className="mt-1 text-sm text-slate-500">
+                    📍 Perdue à {item.lost.lossCity || "lieu non précisé"}
                   </p>
-
                 </div>
 
-                <div>
-
-                  <span className="bg-green-100 text-green-700 px-3 py-2 rounded-full">
-
-                    {
-                      Math.round(
-                        item.score
-                      )
-                    }
-                    %
-
-                  </span>
-
-                </div>
-
-              </div>
-
-              <div className="mt-4">
-
-                <a
-                  href={`/verification/${item.id}`}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                <span
+                  className={`shrink-0 rounded-full border px-3 py-1 text-sm font-semibold ${scoreColor(
+                    item.score
+                  )}`}
                 >
-                  Vérifier
-                </a>
-
+                  {Math.round(item.score)}% de correspondance
+                </span>
               </div>
 
+              <div className="mt-4 flex items-center justify-between border-t pt-4">
+                <p className="text-xs text-slate-400">
+                  🔒 Identité complète masquée jusqu'à vérification
+                </p>
+
+                
+                  href={`/verification/${item.id}`}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                >
+                  Vérifier mon identité →
+                </a>
+              </div>
             </div>
-          )
-        )}
-
-      </div>
-
+          ))}
+        </div>
+      )}
     </div>
   );
 }
