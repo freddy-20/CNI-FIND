@@ -69,6 +69,10 @@ model FoundDocument {
 
   birthPlace String?
 
+  fatherName String?
+  motherName String?
+  profession String?
+
   foundCity String?
 
   foundDate DateTime?
