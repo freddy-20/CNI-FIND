@@ -5,6 +5,26 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    const existing =
+  await prisma.foundDocument.findFirst({
+    where: {
+      cniNumber:
+        body.cniNumber,
+    },
+  });
+
+if (existing) {
+  return NextResponse.json(
+    {
+      error:
+        "Cette CNI existe déjà",
+    },
+    {
+      status: 409,
+    }
+  );
+}
+
     const foundDocument =
       await prisma.foundDocument.create({
         data: {
