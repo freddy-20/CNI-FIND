@@ -1,19 +1,19 @@
+import FoundDocumentForm from "@/components/forms/FoundDocumentForm";
+
 export default function RetrouvePage() {
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
-
+    <div className="max-w-4xl mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-2">
-        Déclarer une CNI retrouvée
+        J'ai retrouvé une CNI
       </h1>
 
       <p className="text-gray-500 mb-8">
-        Ajoutez les informations de la CNI retrouvée.
+        Déclarez une CNI retrouvée afin d'aider son propriétaire.
       </p>
 
-      <div className="bg-white rounded-xl border p-6">
-        Formulaire à venir
+      <div className="bg-white border rounded-xl p-6">
+        <FoundDocumentForm />
       </div>
-
     </div>
   );
 }
