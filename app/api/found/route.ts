@@ -1,178 +1,122 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { foundDocumentSchema } from "@/lib/validations/found-document";
+import { calculateMatchScore, MATCH_THRESHOLD } from "@/lib/matching/calculate-score";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const existing =
-  await prisma.foundDocument.findFirst({
-    where: {
-      cniNumber:
-        body.cniNumber,
-    },
-  });
+    // 1. Validation des données
+    const parsed = foundDocumentSchema.safeParse(body);
 
-if (existing) {
-  return NextResponse.json(
-    {
-      error:
-        "Cette CNI existe déjà",
-    },
-    {
-      status: 409,
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: "Données invalides", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
-  );
-}
 
-    const foundDocument =
-      await prisma.foundDocument.create({
+    const data = parsed.data;
+
+    if (!body.photoUrl) {
+      return NextResponse.json(
+        { success: false, error: "La photo de la CNI est obligatoire" },
+        { status: 400 }
+      );
+    }
+
+    // 2. Numéro bloqué → on arrête AVANT toute création
+    const blocked = await prisma.blockedNumber.findUnique({
+      where: { phone: data.phone },
+    });
+
+    if (blocked) {
+      return NextResponse.json(
+        { success: false, error: "Ce numéro n'est pas autorisé à publier d'annonce" },
+        { status: 403 }
+      );
+    }
+
+    // 3. Doublon — uniquement si un numéro CNI a été renseigné
+    if (data.cniNumber) {
+      const existing = await prisma.foundDocument.findFirst({
+        where: { cniNumber: data.cniNumber, status: { not: "ARCHIVED" } },
+      });
+
+      if (existing) {
+        return NextResponse.json(
+          { success: false, error: "Cette CNI a déjà été déclarée retrouvée" },
+          { status: 409 }
+        );
+      }
+    }
+
+    // 4. Création du document + matching automatique, en transaction
+    const result = await prisma.$transaction(async (tx) => {
+      const foundDocument = await tx.foundDocument.create({
         data: {
-          firstName: body.firstName,
-          lastName: body.lastName,
-
-          cniNumber: body.cniNumber || null,
-
-          birthDate: body.birthDate
-            ? new Date(body.birthDate)
-            : null,
-
-          birthPlace: body.birthPlace || null,
-
-          fatherName: body.fatherName || null,
-
-          motherName: body.motherName || null,
-
-          profession: body.profession || null,
-
-          foundCity: body.foundCity || null,
-
-          foundDate: body.foundDate
-            ? new Date(body.foundDate)
-            : null,
-
+          firstName: data.firstName,
+          lastName: data.lastName,
+          cniNumber: data.cniNumber || null,
+          birthDate: data.birthDate ? new Date(data.birthDate) : null,
+          birthPlace: data.birthPlace || null,
+          profession: null,
+          fatherName: null,
+          motherName: null,
+          foundCity: data.foundCity,
+          foundDate: new Date(data.foundDate),
           photoUrl: body.photoUrl,
-
-          description: body.description || null,
-
-          depositorName:
-            body.depositorName,
-
-          phone: body.phone,
-
-          whatsapp:
-            body.whatsapp || null,
-
-          email: body.email || null,
+          description: data.description || null,
+          depositorName: data.depositorName,
+          phone: data.phone,
+          whatsapp: data.whatsapp || null,
+          email: data.email || null,
         },
       });
 
-    const lostDocuments =
-      await prisma.lostDocument.findMany();
+      // Comparaison avec toutes les déclarations de perte actives
+      const lostDocuments = await tx.lostDocument.findMany({
+        where: { status: "LOST" },
+      });
 
-    for (const lost of lostDocuments) {
-      let score = 0;
+      let matchesCreated = 0;
 
-      if (
-        lost.lastName &&
-        foundDocument.lastName &&
-        lost.lastName.toLowerCase() ===
-          foundDocument.lastName.toLowerCase()
-      ) {
-        score += 30;
+      for (const lost of lostDocuments) {
+        const score = calculateMatchScore(lost, foundDocument);
+
+        if (score >= MATCH_THRESHOLD) {
+          await tx.match.create({
+            data: {
+              lostId: lost.id,
+              foundId: foundDocument.id,
+              score,
+            },
+          });
+
+          await tx.lostDocument.update({
+            where: { id: lost.id },
+            data: { status: "MATCHED" },
+          });
+
+          matchesCreated++;
+        }
       }
 
-      if (
-        lost.firstName &&
-        foundDocument.firstName &&
-        lost.firstName.toLowerCase() ===
-          foundDocument.firstName.toLowerCase()
-      ) {
-        score += 20;
-      }
+      return { foundDocument, matchesCreated };
+    });
 
-      if (
-        lost.birthPlace &&
-        foundDocument.birthPlace &&
-        lost.birthPlace.toLowerCase() ===
-          foundDocument.birthPlace.toLowerCase()
-      ) {
-        score += 10;
-      }
-
-      if (
-        lost.profession &&
-        foundDocument.profession &&
-        lost.profession.toLowerCase() ===
-          foundDocument.profession?.toLowerCase()
-      ) {
-        score += 10;
-      }
-
-      if (
-        lost.fatherName &&
-        foundDocument.fatherName &&
-        lost.fatherName.toLowerCase() ===
-          foundDocument.fatherName.toLowerCase()
-      ) {
-        score += 15;
-      }
-
-      if (
-        lost.motherName &&
-        foundDocument.motherName &&
-        lost.motherName.toLowerCase() ===
-          foundDocument.motherName.toLowerCase()
-      ) {
-        score += 15;
-      }
-
-      if (score >= 60) {
-        await prisma.match.create({
-          data: {
-            lostId: lost.id,
-            foundId: foundDocument.id,
-            score,
-          },
-        });
-      }
-    }
-
-    const blocked =
-  await prisma.blockedNumber.findUnique({
-    where: {
-      phone: body.phone,
-    },
-  });
-
-if (blocked) {
-  return NextResponse.json(
-    {
-      error:
-        "Numéro bloqué",
-    },
-    {
-      status: 403,
-    }
-  );
-}
-    
     return NextResponse.json({
       success: true,
-      data: foundDocument,
+      data: result.foundDocument,
+      matchesCreated: result.matchesCreated,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Erreur /api/found:", error);
 
     return NextResponse.json(
-      {
-        success: false,
-        message:
-          "Erreur lors de l'enregistrement",
-      },
-      {
-        status: 500,
-      }
+      { success: false, error: "Erreur lors de l'enregistrement" },
+      { status: 500 }
     );
   }
 }
