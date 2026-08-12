@@ -4,6 +4,12 @@ export const foundDocumentSchema = z.object({
   firstName: z.string().min(2),
   lastName: z.string().min(2),
 
+  fatherName: z.string().optional(),
+  
+  motherName: z.string().optional(),
+  
+  profession: z.string().optional(),
+  
   cniNumber: z.string().optional(),
 
   birthDate: z.string().optional(),
