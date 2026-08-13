@@ -78,3 +78,30 @@ export async function verifySessionToken(token?: string | null) {
     return false;
   }
 }
+
+export async function getSessionEmail(token?: string | null) {
+  if (!token) return null;
+
+  const valid = await verifySessionToken(token);
+  if (!valid) return null;
+
+  const [payload] = token.split(".");
+
+  try {
+    const json = JSON.parse(new TextDecoder().decode(fromBase64UrlPublic(payload)));
+    return typeof json.email === "string" ? json.email : null;
+  } catch {
+    return null;
+  }
+}
+
+function fromBase64UrlPublic(value: string) {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(
+    value.length + ((4 - (value.length % 4)) % 4),
+    "="
+  );
+  const str = atob(padded);
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
+  return bytes;
+}
