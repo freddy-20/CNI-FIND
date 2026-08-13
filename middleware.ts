@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySessionToken } from "@/lib/auth";
 
+const PUBLIC_ADMIN_PATHS = ["/admin/login", "/admin/setup"];
+
 export async function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/admin") && request.nextUrl.pathname !== "/admin/login") {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/admin") && !PUBLIC_ADMIN_PATHS.includes(pathname)) {
     const token = request.cookies.get("admin-session")?.value;
     const valid = await verifySessionToken(token);
 
