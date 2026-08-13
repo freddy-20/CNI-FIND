@@ -19,9 +19,9 @@ enum DocumentStatus {
 }
 
 model Admin {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -31,7 +31,7 @@ model LostDocument {
   id String @id @default(cuid())
 
   firstName String
-  lastName String
+  lastName  String
 
   birthDate DateTime?
 
@@ -55,13 +55,18 @@ model LostDocument {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([lastName])
+  @@index([firstName])
+  @@index([cniNumber])
+  @@index([status])
 }
 
 model FoundDocument {
   id String @id @default(cuid())
 
   firstName String
-  lastName String
+  lastName  String
 
   cniNumber String?
 
@@ -74,7 +79,6 @@ model FoundDocument {
   profession String?
 
   foundCity String?
-
   foundDate DateTime?
 
   photoUrl String
@@ -83,11 +87,9 @@ model FoundDocument {
 
   depositorName String
 
-  phone String
-
+  phone    String
   whatsapp String?
-
-  email String?
+  email    String?
 
   status DocumentStatus @default(FOUND)
 
@@ -95,6 +97,11 @@ model FoundDocument {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([lastName])
+  @@index([firstName])
+  @@index([cniNumber])
+  @@index([status])
 }
 
 model Match {
@@ -104,22 +111,25 @@ model Match {
 
   verified Boolean @default(false)
 
-  lostId String
+  lostId  String
   foundId String
 
-  lost LostDocument @relation(fields: [lostId], references: [id])
-  found FoundDocument @relation(fields: [foundId], references: [id])
+  lost  LostDocument  @relation(fields: [lostId], references: [id], onDelete: Cascade)
+  found FoundDocument @relation(fields: [foundId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([lostId])
+  @@index([foundId])
 }
 
 model Report {
   id String @id @default(cuid())
 
-  reason String
+  reason      String
   description String?
-  phone String?
+  phone       String?
 
   targetType String?
   targetId   String?
@@ -132,8 +142,7 @@ model Report {
 model BlockedNumber {
   id String @id @default(cuid())
 
-  phone String @unique
-
+  phone  String  @unique
   reason String?
 
   createdAt DateTime @default(now())
