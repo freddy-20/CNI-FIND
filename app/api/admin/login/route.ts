@@ -1,8 +1,7 @@
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken } from "@/lib/auth";
-
-const DEFAULT_ADMIN_EMAIL = "admin@cni.cm";
-const DEFAULT_ADMIN_PASSWORD = "Admin123";
 
 // Anti brute-force : 5 tentatives / 15 min / IP
 const attempts = new Map<string, { count: number; firstAttempt: number }>();
@@ -47,19 +46,7 @@ export async function POST(request: Request) {
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
 
-    let admin = await prisma.admin.findUnique({
-      where: { email },
-    });
-
-    if (!admin && email === DEFAULT_ADMIN_EMAIL && password === DEFAULT_ADMIN_PASSWORD) {
-      const defaultHash = await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10);
-      admin = await prisma.admin.create({
-        data: {
-          email: DEFAULT_ADMIN_EMAIL,
-          password: defaultHash,
-        },
-      });
-    }
+    const admin = await prisma.admin.findUnique({ where: { email } });
 
     if (!admin) {
       recordAttempt(ip);
@@ -67,6 +54,7 @@ export async function POST(request: Request) {
     }
 
     const validPassword = await bcrypt.compare(password, admin.password);
+
     if (!validPassword) {
       recordAttempt(ip);
       return NextResponse.json({ success: false, error: "Identifiants incorrects" }, { status: 401 });
