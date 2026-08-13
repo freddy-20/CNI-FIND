@@ -27,15 +27,15 @@ export default async function ContactPage({
   return (
     <div className="mx-auto max-w-xl px-4 py-10">
       <div className="mb-6 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">
-        <span className="text-xl">✅</span>
-        <span className="font-semibold">Correspondance vérifiée</span>
+        <span className="text-xl">OK</span>
+        <span className="font-semibold">Correspondance verifiee</span>
       </div>
 
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-800">Contactez le déposant</h1>
+        <h1 className="text-2xl font-bold text-slate-800">Contactez le deposant</h1>
         <p className="mt-2 text-sm text-slate-500">
-          Votre CNI a été retrouvée à <strong>{match.found.foundCity}</strong>. Vous pouvez
-          maintenant contacter directement la personne qui l'a déposée.
+          Votre CNI a ete retrouvee a <strong>{match.found.foundCity}</strong>. Vous pouvez
+          maintenant contacter directement la personne qui l'a deposee.
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -43,7 +43,7 @@ export default async function ContactPage({
             href={`tel:${match.found.phone}`}
             className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 p-4 font-semibold text-white transition-colors hover:bg-blue-700"
           >
-            📞 Appeler
+            Appeler
           </a>
 
           {whatsappDigits && (
@@ -53,21 +53,21 @@ export default async function ContactPage({
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 rounded-xl bg-green-600 p-4 font-semibold text-white transition-colors hover:bg-green-700"
             >
-              💬 WhatsApp
+              WhatsApp
             </a>
           )}
         </div>
 
         <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
-          ⚠️ Convenez toujours d'un lieu public pour la remise. CNI FIND est une plateforme
-          citoyenne indépendante — restez vigilant face à toute demande d'argent.
+          Convenez toujours d'un lieu public pour la remise. CNI FIND est une plateforme
+          citoyenne independante — restez vigilant face a toute demande d'argent.
         </div>
 
         
-          href={`/signaler`}
+          href="/signaler"
           className="mt-4 block text-center text-sm text-red-600 hover:underline"
         >
-          🚩 Signaler un problème avec cette annonce
+          Signaler un probleme avec cette annonce
         </a>
       </div>
     </div>
