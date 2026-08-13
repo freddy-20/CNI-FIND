@@ -105,7 +105,7 @@ export default function SearchForm() {
                   Identite complete masquee jusqu'a verification
                 </p>
 
-                
+                <a
                   href={`/verification/${item.id}`}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                 >
