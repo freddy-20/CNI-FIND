@@ -1,35 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { reportSchema } from "@/lib/validations/report";
 
-export async function POST(
-  request: Request
-) {
+export async function POST(request: Request) {
   try {
-    const body =
-      await request.json();
+    const body = await request.json();
+    const parsed = reportSchema.safeParse(body);
 
-    const report =
-      await prisma.report.create({
-        data: {
-          reason: body.reason,
-          description:
-            body.description,
-          phone: body.phone,
-        },
-      });
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: "Données invalides" }, { status: 400 });
+    }
 
-    return NextResponse.json({
-      success: true,
-      report,
-    });
+    const report = await prisma.report.create({ data: parsed.data });
+
+    return NextResponse.json({ success: true, report });
   } catch {
-    return NextResponse.json(
-      {
-        success: false,
-      },
-      {
-        status: 500,
-      }
-    );
+    return NextResponse.json({ success: false, error: "Erreur serveur" }, { status: 500 });
   }
 }
