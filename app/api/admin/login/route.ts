@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken } from "@/lib/auth";
 
-// Anti brute-force : 20 tentatives / 1 min / IP
+// Anti brute-force : 5 tentatives / 15 min / IP
 const attempts = new Map<string, { count: number; firstAttempt: number }>();
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60_000;
