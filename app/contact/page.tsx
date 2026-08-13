@@ -21,12 +21,12 @@ export default function ContactPage() {
 
           <p>
             📞 Téléphone :
-            +237 6 XX XX XX XX
+            +237 6 52 59 12 05
           </p>
 
           <p>
             💬 WhatsApp :
-            +237 6 XX XX XX XX
+            +237 6 92 86 06 95
           </p>
 
         </div>
