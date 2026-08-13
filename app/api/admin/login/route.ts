@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { verifyPassword, createSessionToken } from "@/lib/auth";
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import { createSessionToken } from "@/lib/auth";
 
 // Anti brute-force : 20 tentatives / 1 min / IP
 const attempts = new Map<string, { count: number; firstAttempt: number }>();
@@ -39,31 +41,41 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json();
-  const email = String(body.email || "");
-  const password = String(body.password || "");
+  try {
+    const body = await request.json();
+    const email = String(body.email || "").trim().toLowerCase();
+    const password = String(body.password || "");
 
-  const passwordHash = process.env.ADMIN_PASSWORD_HASH;
-  const validEmail = email === process.env.ADMIN_EMAIL;
-  const validPassword = validEmail && passwordHash ? await verifyPassword(password, passwordHash) : false;
+    const admin = await prisma.admin.findUnique({
+      where: { email },
+    });
 
-  if (!validEmail || !validPassword) {
-    recordAttempt(ip);
-    return NextResponse.json({ success: false, error: "Identifiants incorrects" }, { status: 401 });
+    if (!admin) {
+      recordAttempt(ip);
+      return NextResponse.json({ success: false, error: "Identifiants incorrects" }, { status: 401 });
+    }
+
+    const validPassword = await bcrypt.compare(password, admin.password);
+    if (!validPassword) {
+      recordAttempt(ip);
+      return NextResponse.json({ success: false, error: "Identifiants incorrects" }, { status: 401 });
+    }
+
+    attempts.delete(ip);
+
+    const token = await createSessionToken(email);
+    const response = NextResponse.json({ success: true });
+
+    response.cookies.set("admin-session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
+
+    return response;
+  } catch {
+    return NextResponse.json({ success: false, error: "Erreur serveur" }, { status: 500 });
   }
-
-  attempts.delete(ip);
-
-  const token = await createSessionToken(email);
-  const response = NextResponse.json({ success: true });
-
-  response.cookies.set("admin-session", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24,
-  });
-
-  return response;
 }

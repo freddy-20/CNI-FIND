@@ -77,6 +77,12 @@ export default function AdminLoginPage() {
           >
             {loading ? "Connexion..." : "Se connecter"}
           </button>
+
+          <div className="pt-2 text-center text-sm">
+            <a href="/admin/setup" className="text-blue-700 hover:underline">
+              Premier accès admin
+            </a>
+          </div>
         </form>
       </div>
     </div>
