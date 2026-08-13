@@ -42,7 +42,7 @@ export default function SearchForm() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && search()}
-          placeholder="Nom ou prénom..."
+          placeholder="Nom ou prenom..."
           className="flex-1 rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
         />
         <button
@@ -50,11 +50,10 @@ export default function SearchForm() {
           disabled={loading}
           className="rounded-lg bg-blue-600 px-6 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
         >
-          🔍 Rechercher
+          Rechercher
         </button>
       </div>
 
-      {/* État : chargement */}
       {loading && (
         <div className="space-y-4">
           {[1, 2].map((i) => (
@@ -66,18 +65,15 @@ export default function SearchForm() {
         </div>
       )}
 
-      {/* État : vide */}
       {!loading && searched && results.length === 0 && (
         <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-          <p className="text-3xl">🔎</p>
-          <p className="mt-2 font-medium text-slate-700">Aucune correspondance trouvée</p>
+          <p className="mt-2 font-medium text-slate-700">Aucune correspondance trouvee</p>
           <p className="mt-1 text-sm text-slate-400">
-            Essayez avec seulement le nom, ou revenez plus tard — de nouvelles CNI sont ajoutées régulièrement.
+            Essayez avec seulement le nom, ou revenez plus tard.
           </p>
         </div>
       )}
 
-      {/* Résultats */}
       {!loading && results.length > 0 && (
         <div className="space-y-4">
           {results.map((item) => (
@@ -91,7 +87,7 @@ export default function SearchForm() {
                     {hideName(item.lost.lastName)} {hideName(item.lost.firstName)}
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    📍 Perdue à {item.lost.lossCity || "lieu non précisé"}
+                    Perdue a {item.lost.lossCity || "lieu non precise"}
                   </p>
                 </div>
 
@@ -106,14 +102,14 @@ export default function SearchForm() {
 
               <div className="mt-4 flex items-center justify-between border-t pt-4">
                 <p className="text-xs text-slate-400">
-                  🔒 Identité complète masquée jusqu'à vérification
+                  Identite complete masquee jusqu'a verification
                 </p>
 
                 
                   href={`/verification/${item.id}`}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                 >
-                  Vérifier mon identité →
+                  Verifier mon identite
                 </a>
               </div>
             </div>
