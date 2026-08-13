@@ -118,12 +118,15 @@ model Report {
   id String @id @default(cuid())
 
   reason String
-
   description String?
-
   phone String?
 
+  targetType String?
+  targetId   String?
+
   createdAt DateTime @default(now())
+
+  @@index([targetType, targetId])
 }
 
 model BlockedNumber {
