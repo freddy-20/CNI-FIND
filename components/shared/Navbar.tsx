@@ -16,6 +16,12 @@ export default function Navbar() {
           <Link href="/retrouve">Retrouvé</Link>
           <Link href="/recherche">Recherche</Link>
           <Link href="/contact">Contact</Link>
+          <Link
+            href="/admin"
+            className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
+          >
+            Admin
+          </Link>
         </nav>
       </div>
     </header>
