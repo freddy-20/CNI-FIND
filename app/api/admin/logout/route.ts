@@ -1,19 +1,7 @@
 import { NextResponse } from "next/server";
 
-export async function POST(
-  request: Request
-) {
-  const response =
-    NextResponse.redirect(
-      new URL(
-        "/admin/login",
-        request.url
-      )
-    );
-
-  response.cookies.delete(
-    "admin-auth"
-  );
-
+export async function POST(request: Request) {
+  const response = NextResponse.redirect(new URL("/admin/login", request.url));
+  response.cookies.delete("admin-session");
   return response;
 }
