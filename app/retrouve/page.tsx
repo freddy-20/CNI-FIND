@@ -19,22 +19,15 @@ export default function RetrouvePage() {
             Plateforme citoyenne camerounaise
           </span>
 
-          <h1 className="mt-6 text-3xl font-bold sm:text-5xl">
-            J'ai retrouvé une CNI
-          </h1>
+          <h1 className="mt-6 text-3xl font-bold sm:text-5xl">J'ai retrouvé une CNI</h1>
           <p className="mx-auto mt-4 max-w-xl text-slate-300">
             Déclarez la carte que vous avez trouvée en quelques minutes. Elle sera automatiquement
             comparée aux déclarations de perte pour retrouver son propriétaire.
           </p>
         </div>
 
-        <div
-          className="glass-card animate-fade-in-up mt-10 p-6 sm:p-10"
-          style={{ animationDelay: "150ms" }}
-        >
-          <div className="rounded-xl bg-white p-5 sm:p-8">
-            <FoundDocumentForm />
-          </div>
+        <div className="glass-card animate-fade-in-up mt-10 p-6 sm:p-10" style={{ animationDelay: "150ms" }}>
+          <FoundDocumentForm />
         </div>
 
         <div
