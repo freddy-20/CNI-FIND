@@ -1,54 +1,29 @@
+const STEPS = [
+  { title: "1. Déclarer", text: "Déclarez une CNI perdue ou retrouvée." },
+  { title: "2. Recherche", text: "Le système recherche les correspondances." },
+  { title: "3. Vérification", text: "Vérification sécurisée des informations." },
+  { title: "4. Restitution", text: "Contact sécurisé pour récupérer la CNI." },
+];
+
 export default function HowItWorks() {
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-4">
-
-        <h2 className="text-3xl font-bold text-center mb-12">
+    <section className="px-4 py-16 sm:py-20">
+      <div className="mx-auto max-w-6xl">
+        <h2 className="animate-fade-in-up mb-12 text-center text-3xl font-bold text-white">
           Comment ça marche ?
         </h2>
 
-        <div className="grid md:grid-cols-4 gap-6">
-
-          <div className="bg-slate-50 p-6 rounded-xl">
-            <h3 className="font-bold text-lg mb-2">
-              1. Déclarer
-            </h3>
-
-            <p className="text-gray-600">
-              Déclarez une CNI perdue ou retrouvée.
-            </p>
-          </div>
-
-          <div className="bg-slate-50 p-6 rounded-xl">
-            <h3 className="font-bold text-lg mb-2">
-              2. Recherche
-            </h3>
-
-            <p className="text-gray-600">
-              Le système recherche les correspondances.
-            </p>
-          </div>
-
-          <div className="bg-slate-50 p-6 rounded-xl">
-            <h3 className="font-bold text-lg mb-2">
-              3. Vérification
-            </h3>
-
-            <p className="text-gray-600">
-              Vérification sécurisée des informations.
-            </p>
-          </div>
-
-          <div className="bg-slate-50 p-6 rounded-xl">
-            <h3 className="font-bold text-lg mb-2">
-              4. Restitution
-            </h3>
-
-            <p className="text-gray-600">
-              Contact sécurisé pour récupérer la CNI.
-            </p>
-          </div>
-
+        <div className="grid gap-6 md:grid-cols-4">
+          {STEPS.map((step, i) => (
+            <div
+              key={step.title}
+              className="glass-card animate-fade-in-up p-6"
+              style={{ animationDelay: `${i * 120}ms` }}
+            >
+              <h3 className="mb-2 text-lg font-bold text-white">{step.title}</h3>
+              <p className="text-slate-300">{step.text}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
