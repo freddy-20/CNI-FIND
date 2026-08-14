@@ -3,6 +3,9 @@
 import { useState } from "react";
 import ImageUpload from "./ImageUpload";
 
+const inputClass =
+  "w-full rounded-lg border border-white/15 bg-white/[0.04] p-3 text-white placeholder-slate-400 focus:border-blue-400 focus:bg-white/[0.07] focus:outline-none transition-colors";
+
 export default function FoundDocumentForm() {
   const [photoUrl, setPhotoUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -74,135 +77,72 @@ export default function FoundDocumentForm() {
         <div
           className={`rounded-xl border p-4 text-sm ${
             feedback.type === "success"
-              ? "border-green-200 bg-green-50 text-green-700"
-              : "border-red-200 bg-red-50 text-red-700"
+              ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
+              : "border-red-400/30 bg-red-500/10 text-red-300"
           }`}
         >
           {feedback.message}
         </div>
       )}
 
-      {/* Section 1 : Identité sur la CNI */}
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-300">
           1. Identité sur la carte
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <input
-            name="lastName"
-            placeholder="Nom *"
-            required
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            name="firstName"
-            placeholder="Prénom(s) *"
-            required
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            name="cniNumber"
-            placeholder="Numéro CNI (si visible)"
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            type="date"
-            name="birthDate"
-            placeholder="Date de naissance"
-            className="rounded-lg border border-slate-300 p-3 text-slate-500 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            name="birthPlace"
-            placeholder="Lieu de naissance"
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            name="profession"
-            placeholder="Profession"
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            name="fatherName"
-            placeholder="Nom du père"
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            name="motherName"
-            placeholder="Nom de la mère"
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
+          <input name="lastName" placeholder="Nom *" required className={inputClass} />
+          <input name="firstName" placeholder="Prénom(s) *" required className={inputClass} />
+          <input name="cniNumber" placeholder="Numéro CNI (si visible)" className={inputClass} />
+          <input type="date" name="birthDate" className={`${inputClass} [color-scheme:dark]`} />
+          <input name="birthPlace" placeholder="Lieu de naissance" className={inputClass} />
+          <input name="profession" placeholder="Profession" className={inputClass} />
+          <input name="fatherName" placeholder="Nom du père" className={inputClass} />
+          <input name="motherName" placeholder="Nom de la mère" className={inputClass} />
         </div>
       </section>
 
-      {/* Section 2 : Découverte */}
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-300">
           2. Où et quand l'avez-vous trouvée ?
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <input
-            name="foundCity"
-            placeholder="Ville / Quartier *"
-            required
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            type="date"
-            name="foundDate"
-            required
-            className="rounded-lg border border-slate-300 p-3 text-slate-500 focus:border-blue-500 focus:outline-none"
-          />
+          <input name="foundCity" placeholder="Ville / Quartier *" required className={inputClass} />
+          <input type="date" name="foundDate" required className={`${inputClass} [color-scheme:dark]`} />
         </div>
 
         <textarea
           name="description"
           placeholder="Description facultative (circonstances, lieu précis...)"
           rows={3}
-          className="w-full rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
+          className={inputClass}
         />
       </section>
 
-      {/* Section 3 : Photo */}
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-300">
           3. Photo de la CNI *
         </h2>
         <ImageUpload onUploaded={setPhotoUrl} />
       </section>
 
-      {/* Section 4 : Coordonnées du déposant */}
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-blue-300">
           4. Vos coordonnées
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <input
-            name="depositorName"
-            placeholder="Votre nom *"
-            required
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
+          <input name="depositorName" placeholder="Votre nom *" required className={inputClass} />
           <input
             name="phone"
             placeholder="+237 6XX XXX XXX *"
             required
             pattern="^(\+237)?[26][0-9]{8}$"
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
+            className={inputClass}
           />
-          <input
-            name="whatsapp"
-            placeholder="Numéro WhatsApp (si différent)"
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email (facultatif)"
-            className="rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-          />
+          <input name="whatsapp" placeholder="Numéro WhatsApp (si différent)" className={inputClass} />
+          <input type="email" name="email" placeholder="Email (facultatif)" className={inputClass} />
         </div>
 
         <p className="text-xs text-slate-400">
@@ -211,10 +151,7 @@ export default function FoundDocumentForm() {
         </p>
       </section>
 
-      <button
-        disabled={loading}
-        className="w-full rounded-xl bg-green-600 p-4 font-semibold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
-      >
+      <button disabled={loading} className="btn-primary w-full bg-emerald-600 hover:bg-emerald-700 hover:shadow-emerald-600/30">
         {loading ? "Enregistrement en cours..." : "✅ Déclarer la CNI retrouvée"}
       </button>
     </form>
