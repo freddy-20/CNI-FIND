@@ -103,12 +103,12 @@ export default function ImageUpload({ onUploaded }: ImageUploadProps) {
           onClick={() => inputRef.current?.click()}
           className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-colors ${
             dragActive
-              ? "border-blue-500 bg-blue-50"
-              : "border-slate-300 bg-slate-50 hover:bg-slate-100"
+              ? "border-blue-400 bg-blue-500/10"
+              : "border-white/20 bg-white/[0.03] hover:bg-white/[0.06]"
           }`}
         >
           <span className="text-3xl">📷</span>
-          <p className="text-sm font-medium text-slate-700">
+          <p className="text-sm font-medium text-slate-200">
             Touchez pour prendre / choisir une photo
           </p>
           <p className="text-xs text-slate-400">JPG, PNG, WEBP — max 5 Mo</p>
@@ -125,12 +125,12 @@ export default function ImageUpload({ onUploaded }: ImageUploadProps) {
       )}
 
       {preview && (
-        <div className="relative overflow-hidden rounded-xl border">
+        <div className="relative overflow-hidden rounded-xl border border-white/10">
           <img src={preview} alt="Aperçu de la CNI" className="w-full max-h-72 object-cover" />
 
           {status === "uploading" && (
-            <div className="absolute inset-x-0 bottom-0 bg-black/50 p-2">
-              <div className="h-2 w-full rounded-full bg-white/30">
+            <div className="absolute inset-x-0 bottom-0 bg-black/60 p-2">
+              <div className="h-2 w-full rounded-full bg-white/20">
                 <div
                   className="h-2 rounded-full bg-blue-500 transition-all"
                   style={{ width: `${progress}%` }}
@@ -141,7 +141,7 @@ export default function ImageUpload({ onUploaded }: ImageUploadProps) {
           )}
 
           {status === "success" && (
-            <div className="absolute top-2 right-2 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white">
+            <div className="absolute top-2 right-2 rounded-full bg-emerald-600 px-3 py-1 text-xs font-medium text-white">
               ✓ Envoyée
             </div>
           )}
@@ -149,14 +149,14 @@ export default function ImageUpload({ onUploaded }: ImageUploadProps) {
           <button
             type="button"
             onClick={reset}
-            className="absolute top-2 left-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 shadow"
+            className="absolute top-2 left-2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white shadow"
           >
             ✕ Retirer
           </button>
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
     </div>
   );
 }
