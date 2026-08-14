@@ -31,6 +31,9 @@ export default async function AdminPage() {
       prisma.foundDocument.findMany({ orderBy: { createdAt: "desc" }, take: 10 }),
     ]);
 
+  const photoLinkClass = "shrink-0";
+  const photoImgClass = "h-20 w-20 rounded-lg border object-cover transition-opacity hover:opacity-80";
+
   return (
     <AdminShell adminEmail={adminEmail}>
       <div className="mb-8">
@@ -103,19 +106,7 @@ export default async function AdminPage() {
             {foundDocuments.map((item) => (
               <div key={item.id} className="rounded-xl border p-4 transition-colors hover:bg-slate-50">
                 <div className="flex gap-4">
-                  
-                    href={item.photoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shrink-0"
-                    title="Voir la photo en plein format"
-                  >
-                    <img
-                      src={item.photoUrl}
-                      alt={`CNI de ${item.lastName} ${item.firstName}`}
-                      className="h-20 w-20 rounded-lg border object-cover transition-opacity hover:opacity-80"
-                    />
-                  </a>
+                  <a href={item.photoUrl} target="_blank" rel="noopener noreferrer" className={photoLinkClass} title="Voir la photo en plein format"><img src={item.photoUrl} alt={`CNI de ${item.lastName} ${item.firstName}`} className={photoImgClass} /></a>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
