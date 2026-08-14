@@ -7,7 +7,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // 1. Validation des données
     const parsed = foundDocumentSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -26,7 +25,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Numéro bloqué → on arrête AVANT toute création
     const blocked = await prisma.blockedNumber.findUnique({
       where: { phone: data.phone },
     });
@@ -38,7 +36,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Doublon — uniquement si un numéro CNI a été renseigné
     if (data.cniNumber) {
       const existing = await prisma.foundDocument.findFirst({
         where: { cniNumber: data.cniNumber, status: { not: "ARCHIVED" } },
@@ -52,7 +49,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // 4. Création du document + matching automatique, en transaction
     const result = await prisma.$transaction(async (tx) => {
       const foundDocument = await tx.foundDocument.create({
         data: {
@@ -61,9 +57,9 @@ export async function POST(request: Request) {
           cniNumber: data.cniNumber || null,
           birthDate: data.birthDate ? new Date(data.birthDate) : null,
           birthPlace: data.birthPlace || null,
-          profession: null,
-          fatherName: null,
-          motherName: null,
+          profession: data.profession || null,
+          fatherName: data.fatherName || null,
+          motherName: data.motherName || null,
           foundCity: data.foundCity,
           foundDate: new Date(data.foundDate),
           photoUrl: body.photoUrl,
@@ -75,7 +71,6 @@ export async function POST(request: Request) {
         },
       });
 
-      // Comparaison avec toutes les déclarations de perte actives
       const lostDocuments = await tx.lostDocument.findMany({
         where: { status: "LOST" },
       });
