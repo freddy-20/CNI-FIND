@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+const inputClass =
+  "w-full rounded-lg border border-white/15 bg-white/[0.04] p-3 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none transition-colors";
+
 export default function VerificationForm({ matchId }: { matchId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -14,7 +17,6 @@ export default function VerificationForm({ matchId }: { matchId: string }) {
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-
     const payload = {
       fatherName: formData.get("fatherName"),
       motherName: formData.get("motherName"),
@@ -45,39 +47,27 @@ export default function VerificationForm({ matchId }: { matchId: string }) {
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-300">
           {error}
         </div>
       )}
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-600">Nom du père</label>
-        <input
-          name="fatherName"
-          className="w-full rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-        />
+        <label className="mb-1 block text-sm font-medium text-slate-300">Nom du père</label>
+        <input name="fatherName" className={inputClass} />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-600">Nom de la mère</label>
-        <input
-          name="motherName"
-          className="w-full rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-        />
+        <label className="mb-1 block text-sm font-medium text-slate-300">Nom de la mère</label>
+        <input name="motherName" className={inputClass} />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-600">Lieu de naissance</label>
-        <input
-          name="birthPlace"
-          className="w-full rounded-lg border border-slate-300 p-3 focus:border-blue-500 focus:outline-none"
-        />
+        <label className="mb-1 block text-sm font-medium text-slate-300">Lieu de naissance</label>
+        <input name="birthPlace" className={inputClass} />
       </div>
 
-      <button
-        disabled={loading}
-        className="rounded-lg bg-blue-600 p-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
-      >
+      <button disabled={loading} className="btn-primary">
         {loading ? "Vérification..." : "Vérifier mon identité"}
       </button>
 
