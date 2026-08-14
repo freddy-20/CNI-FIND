@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { lostDocumentSchema } from "@/lib/validations/lost-document";
+import { calculateMatchScore, MATCH_THRESHOLD } from "@/lib/matching/calculate-score";
 
 const attempts = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -13,12 +14,10 @@ function getClientIp(request: Request) {
 function isRateLimited(ip: string) {
   const now = Date.now();
   const recent = (attempts.get(ip) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-
   if (recent.length >= RATE_LIMIT_MAX) {
     attempts.set(ip, recent);
     return true;
   }
-
   recent.push(now);
   attempts.set(ip, recent);
   return false;
@@ -29,41 +28,69 @@ export async function POST(request: Request) {
     const ip = getClientIp(request);
 
     if (isRateLimited(ip)) {
-      return NextResponse.json(
-        { error: "Trop de tentatives. Réessayez dans une minute." },
-        { status: 429 }
-      );
+      return NextResponse.json({ error: "Trop de tentatives. Réessayez dans une minute." }, { status: 429 });
     }
 
     const body = await request.json();
     const parsed = lostDocumentSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Données invalides", details: parsed.error.flatten() },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Données invalides", details: parsed.error.flatten() }, { status: 400 });
     }
 
     const data = parsed.data;
 
-    const document = await prisma.lostDocument.create({
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        birthDate: data.birthDate ? new Date(data.birthDate) : null,
-        profession: data.profession || null,
-        fatherName: data.fatherName || null,
-        motherName: data.motherName || null,
-        birthPlace: data.birthPlace || null,
-        lossCity: data.lossCity || null,
-        lossDate: data.lossDate ? new Date(data.lossDate) : null,
-        cniNumber: data.cniNumber || null,
-        phone: data.phone,
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      const lostDocument = await tx.lostDocument.create({
+        data: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          birthDate: data.birthDate ? new Date(data.birthDate) : null,
+          profession: data.profession || null,
+          fatherName: data.fatherName || null,
+          motherName: data.motherName || null,
+          birthPlace: data.birthPlace || null,
+          lossCity: data.lossCity || null,
+          lossDate: data.lossDate ? new Date(data.lossDate) : null,
+          cniNumber: data.cniNumber || null,
+          phone: data.phone,
+        },
+      });
+
+      // Comparaison avec toutes les CNI déjà retrouvées et encore disponibles
+      const foundDocuments = await tx.foundDocument.findMany({
+        where: { status: { notIn: ["RETURNED", "ARCHIVED"] } },
+      });
+
+      let matchesCreated = 0;
+
+      for (const found of foundDocuments) {
+        const score = calculateMatchScore(lostDocument, found);
+
+        if (score >= MATCH_THRESHOLD) {
+          const existing = await tx.match.findFirst({
+            where: { lostId: lostDocument.id, foundId: found.id },
+          });
+
+          if (!existing) {
+            await tx.match.create({
+              data: { lostId: lostDocument.id, foundId: found.id, score },
+            });
+
+            await tx.lostDocument.update({
+              where: { id: lostDocument.id },
+              data: { status: "MATCHED" },
+            });
+
+            matchesCreated++;
+          }
+        }
+      }
+
+      return { lostDocument, matchesCreated };
     });
 
-    return NextResponse.json(document);
+    return NextResponse.json(result.lostDocument);
   } catch (error) {
     console.error("Erreur /api/lost:", error);
     return NextResponse.json({ error: "Erreur lors de l'enregistrement" }, { status: 500 });
