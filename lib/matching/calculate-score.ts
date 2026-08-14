@@ -1,4 +1,4 @@
-export const MATCH_THRESHOLD = 60;
+export const MATCH_THRESHOLD = 45;
 
 type LostData = {
   firstName?: string | null;
