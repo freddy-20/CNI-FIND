@@ -14,6 +14,8 @@ export async function POST(request: Request) {
     const results = await prisma.match.findMany({
       where: {
         score: { gte: MATCH_THRESHOLD },
+        lost: { status: { notIn: ["RETURNED", "ARCHIVED"] } },
+        found: { status: { notIn: ["RETURNED", "ARCHIVED"] } },
         OR: [
           { lost: { lastName: { contains: query, mode: "insensitive" } } },
           { lost: { firstName: { contains: query, mode: "insensitive" } } },
