@@ -1,0 +1,35 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="white"/>
+  
+  <!-- Loupe - cercle principal bleu -->
+  <circle cx="256" cy="200" r="120" fill="none" stroke="#003d82" stroke-width="35"/>
+  
+  <!-- Cercle intérieur blanc -->
+  <circle cx="256" cy="200" r="85" fill="white" stroke="#000" stroke-width="3"/>
+  
+  <!-- Carte du Cameroun silhouette -->
+  <path d="M 240 160 Q 235 155 235 145 Q 235 135 245 130 Q 255 125 260 130 Q 265 125 270 130 Q 275 125 280 135 Q 285 145 280 160 Q 270 180 260 190 Q 250 185 240 160 Z" fill="#003d82"/>
+  
+  <!-- Drapeau du Cameroun - secteur circulaire à droite -->
+  <!-- Vert -->
+  <path d="M 330 140 A 90 90 0 0 1 360 120 L 340 170 A 50 50 0 0 1 320 180 Z" fill="#22b14c"/>
+  
+  <!-- Rouge avec étoile -->
+  <path d="M 360 120 A 90 90 0 0 1 360 260 L 340 220 A 50 50 0 0 1 340 170 Z" fill="#ed1c24"/>
+  
+  <!-- Étoile jaune -->
+  <path d="M 350 175 L 355 190 L 371 190 L 358 200 L 363 215 L 350 205 L 337 215 L 342 200 L 329 190 L 345 190 Z" fill="#ffd700"/>
+  
+  <!-- Jaune -->
+  <path d="M 360 260 A 90 90 0 0 1 330 280 L 340 220 A 50 50 0 0 1 360 230 Z" fill="#ffd700"/>
+  
+  <!-- Manche de la loupe -->
+  <rect x="310" y="310" width="45" height="35" rx="15" fill="#003d82" transform="rotate(-45 332 327)"/>
+  
+  <!-- Ligne verte sous le texte -->
+  <rect x="120" y="380" width="80" height="6" fill="#22b14c" rx="3"/>
+  
+  <!-- Ligne jaune sous le texte -->
+  <rect x="312" y="380" width="80" height="6" fill="#ffd700" rx="3"/>
+</svg>
