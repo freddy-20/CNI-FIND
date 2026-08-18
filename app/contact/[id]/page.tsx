@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { toWhatsAppDigits } from "@/utils/phone";
+import { verifyMatchVerificationToken, matchVerificationCookieName } from "@/lib/auth";
 import AnimatedBackground from "@/components/shared/AnimatedBackground";
 
 export default async function ContactPage({ params }: { params: Promise<{ id: string }> }) {
@@ -9,7 +11,17 @@ export default async function ContactPage({ params }: { params: Promise<{ id: st
   const match = await prisma.match.findUnique({ where: { id }, include: { found: true } });
 
   if (!match) return notFound();
-  if (!match.verified) redirect(`/verification/${match.id}`);
+
+  // On ne se fie JAMAIS à match.verified (flag global en base) pour donner
+  // accès aux coordonnées : ça permettrait à n'importe qui ayant le lien
+  // d'accéder aux infos dès qu'UNE seule personne s'est vérifiée avec succès.
+  // On vérifie plutôt le cookie signé, propre à ce visiteur, posé par
+  // /api/verify/[id] après une vérification réussie.
+  const cookieStore = await cookies();
+  const token = cookieStore.get(matchVerificationCookieName(match.id))?.value;
+  const isVerifiedForThisVisitor = await verifyMatchVerificationToken(match.id, token);
+
+  if (!isVerifiedForThisVisitor) redirect(`/verification/${match.id}`);
 
   const whatsappDigits = toWhatsAppDigits(match.found.whatsapp || match.found.phone);
   const callClass = "flex items-center justify-center gap-2 rounded-xl bg-blue-600 p-4 font-semibold text-white transition-colors hover:bg-blue-700";
