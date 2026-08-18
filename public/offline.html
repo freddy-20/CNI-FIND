@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hors ligne - CNI FIND</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            background: linear-gradient(135deg, #003d82 0%, #005ab3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: #f0f4f8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        h1 {
+            color: #003d82;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #003d82 0%, #005ab3 100%);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 61, 130, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .footer {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📡</div>
+        <h1>Hors ligne</h1>
+        <p>
+            Vous n'avez pas accès à Internet pour le moment. 
+            Vérifiez votre connexion et réessayez.
+        </p>
+        <button class="button" onclick="location.reload()">
+            Réessayer
+        </button>
+        <div class="footer">
+            <p>CNI FIND © 2026</p>
+        </div>
+    </div>
+</body>
+</html>
