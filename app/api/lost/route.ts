@@ -57,14 +57,17 @@ export async function POST(request: Request) {
         },
       });
 
-      // Comparaison avec toutes les CNI déjà retrouvées et encore disponibles
-      const foundDocuments = await tx.foundDocument.findMany({
-        where: { status: { notIn: ["RETURNED", "ARCHIVED"] } },
+      // Même optimisation : ne compare qu'avec le même nom de famille
+      const foundCandidates = await tx.foundDocument.findMany({
+        where: {
+          status: { notIn: ["RETURNED", "ARCHIVED"] },
+          lastName: { equals: lostDocument.lastName, mode: "insensitive" },
+        },
       });
 
       let matchesCreated = 0;
 
-      for (const found of foundDocuments) {
+      for (const found of foundCandidates) {
         const score = calculateMatchScore(lostDocument, found);
 
         if (score >= MATCH_THRESHOLD) {
@@ -73,15 +76,8 @@ export async function POST(request: Request) {
           });
 
           if (!existing) {
-            await tx.match.create({
-              data: { lostId: lostDocument.id, foundId: found.id, score },
-            });
-
-            await tx.lostDocument.update({
-              where: { id: lostDocument.id },
-              data: { status: "MATCHED" },
-            });
-
+            await tx.match.create({ data: { lostId: lostDocument.id, foundId: found.id, score } });
+            await tx.lostDocument.update({ where: { id: lostDocument.id }, data: { status: "MATCHED" } });
             matchesCreated++;
           }
         }
