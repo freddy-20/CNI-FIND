@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import {
+  createMatchVerificationToken,
+  verifyMatchVerificationToken,
+  matchVerificationCookieName,
+} from "@/lib/auth";
 
 // Anti brute-force : 5 essais max par match / 10 minutes
 const attempts = new Map<string, { count: number; firstAttempt: number }>();
@@ -35,6 +41,16 @@ export async function POST(
   try {
     const { id } = await params;
 
+    // Si CE visiteur a déjà été vérifié pour CE match (cookie signé propre à
+    // lui), on le laisse passer sans re-poser les questions. On ne se base
+    // JAMAIS sur match.verified (flag global en base) pour ça : voir lib/auth.ts.
+    const cookieStore = await cookies();
+    const existingToken = cookieStore.get(matchVerificationCookieName(id))?.value;
+
+    if (await verifyMatchVerificationToken(id, existingToken)) {
+      return NextResponse.json({ success: true, redirect: `/contact/${id}` });
+    }
+
     if (isBlocked(id)) {
       return NextResponse.json(
         { success: false, error: "Trop de tentatives. Réessayez dans quelques minutes." },
@@ -57,10 +73,6 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Correspondance introuvable" }, { status: 404 });
     }
 
-    if (match.verified) {
-      return NextResponse.json({ success: true, redirect: `/contact/${match.id}` });
-    }
-
     recordAttempt(id);
 
     let score = 0;
@@ -70,6 +82,8 @@ export async function POST(
     if (birthPlace && match.lost.birthPlace?.toLowerCase() === birthPlace.toLowerCase()) score++;
 
     if (score >= 2) {
+      // Flag global : sert uniquement à l'admin / aux stats, jamais à autoriser
+      // l'accès d'un autre visiteur (voir lib/auth.ts).
       await prisma.match.update({
         where: { id: match.id },
         data: { verified: true },
@@ -82,7 +96,18 @@ export async function POST(
 
       attempts.delete(id);
 
-      return NextResponse.json({ success: true, redirect: `/contact/${match.id}` });
+      const token = await createMatchVerificationToken(match.id);
+      const response = NextResponse.json({ success: true, redirect: `/contact/${match.id}` });
+
+      response.cookies.set(matchVerificationCookieName(match.id), token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24, // 24h, aligné sur l'expiration du token
+      });
+
+      return response;
     }
 
     return NextResponse.json(
