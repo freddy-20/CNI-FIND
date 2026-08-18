@@ -71,22 +71,23 @@ export async function POST(request: Request) {
         },
       });
 
-      const lostDocuments = await tx.lostDocument.findMany({
-        where: { status: "LOST" },
+      // Ne compare qu'avec les pertes du même nom de famille — beaucoup plus rapide
+      // qu'une comparaison avec TOUTES les déclarations existantes.
+      const lostCandidates = await tx.lostDocument.findMany({
+        where: {
+          status: "LOST",
+          lastName: { equals: foundDocument.lastName, mode: "insensitive" },
+        },
       });
 
       let matchesCreated = 0;
 
-      for (const lost of lostDocuments) {
+      for (const lost of lostCandidates) {
         const score = calculateMatchScore(lost, foundDocument);
 
         if (score >= MATCH_THRESHOLD) {
           await tx.match.create({
-            data: {
-              lostId: lost.id,
-              foundId: foundDocument.id,
-              score,
-            },
+            data: { lostId: lost.id, foundId: foundDocument.id, score },
           });
 
           await tx.lostDocument.update({
@@ -108,10 +109,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Erreur /api/found:", error);
-
-    return NextResponse.json(
-      { success: false, error: "Erreur lors de l'enregistrement" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Erreur lors de l'enregistrement" }, { status: 500 });
   }
 }
