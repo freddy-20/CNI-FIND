@@ -105,3 +105,58 @@ function fromBase64UrlPublic(value: string) {
   for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
   return bytes;
 }
+
+// --- Vérification d'identité par match (côté visiteur) ---
+// IMPORTANT : la colonne Match.verified en base est un flag GLOBAL (utile pour
+// l'admin/les stats), il ne doit JAMAIS servir à autoriser l'accès aux
+// coordonnées d'un déposant. Une fois qu'UNE personne répond correctement,
+// ce flag passerait à true pour tout le monde, y compris quelqu'un qui n'a
+// jamais répondu aux questions. On utilise donc un token signé, propre à
+// (matchId + visiteur), stocké dans un cookie httpOnly.
+
+export async function createMatchVerificationToken(matchId: string) {
+  const secret = requireSecret();
+  const expires = Date.now() + 1000 * 60 * 60 * 24; // 24h
+
+  const payload = toBase64Url(encoder.encode(JSON.stringify({ matchId, expires })));
+  const key = await getKey(secret);
+  const signature = toBase64Url(await crypto.subtle.sign("HMAC", key, encoder.encode(payload)));
+
+  return `${payload}.${signature}`;
+}
+
+export async function verifyMatchVerificationToken(matchId: string, token?: string | null) {
+  if (!token) return false;
+
+  const secret = process.env.ADMIN_SESSION_SECRET;
+  if (!secret) return false;
+
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return false;
+
+  try {
+    const key = await getKey(secret);
+    const valid = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      fromBase64Url(signature),
+      encoder.encode(payload)
+    );
+
+    if (!valid) return false;
+
+    const data = JSON.parse(new TextDecoder().decode(fromBase64Url(payload)));
+
+    return (
+      data.matchId === matchId &&
+      typeof data.expires === "number" &&
+      data.expires > Date.now()
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function matchVerificationCookieName(matchId: string) {
+  return `mv_${matchId}`;
+}
